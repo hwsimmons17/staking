@@ -9,8 +9,6 @@
 import {
   ACCOUNT_HEADER_SIZE,
   Context,
-  Pda,
-  PublicKey,
   Signer,
   TransactionBuilder,
   transactionBuilder,
@@ -31,50 +29,46 @@ import {
 } from '../shared';
 
 // Accounts.
-export type CreateInstructionAccounts = {
+export type UpdateInstructionAccounts = {
   /** The address of the new account */
   address: Signer;
-  /** The authority of the new account */
-  authority?: PublicKey | Pda;
-  /** The account paying for the storage fees */
-  payer?: Signer;
-  /** The system program */
-  systemProgram?: PublicKey | Pda;
+  /** The authority of the account */
+  authority?: Signer;
 };
 
 // Data.
-export type CreateInstructionData = {
+export type UpdateInstructionData = {
   discriminator: number;
   arg1: number;
   arg2: number;
 };
 
-export type CreateInstructionDataArgs = { arg1: number; arg2: number };
+export type UpdateInstructionDataArgs = { arg1: number; arg2: number };
 
-export function getCreateInstructionDataSerializer(): Serializer<
-  CreateInstructionDataArgs,
-  CreateInstructionData
+export function getUpdateInstructionDataSerializer(): Serializer<
+  UpdateInstructionDataArgs,
+  UpdateInstructionData
 > {
-  return mapSerializer<CreateInstructionDataArgs, any, CreateInstructionData>(
-    struct<CreateInstructionData>(
+  return mapSerializer<UpdateInstructionDataArgs, any, UpdateInstructionData>(
+    struct<UpdateInstructionData>(
       [
         ['discriminator', u8()],
         ['arg1', u16()],
         ['arg2', u32()],
       ],
-      { description: 'CreateInstructionData' }
+      { description: 'UpdateInstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 0 })
-  ) as Serializer<CreateInstructionDataArgs, CreateInstructionData>;
+    (value) => ({ ...value, discriminator: 1 })
+  ) as Serializer<UpdateInstructionDataArgs, UpdateInstructionData>;
 }
 
 // Args.
-export type CreateInstructionArgs = CreateInstructionDataArgs;
+export type UpdateInstructionArgs = UpdateInstructionDataArgs;
 
 // Instruction.
-export function create(
+export function update(
   context: Pick<Context, 'identity' | 'payer' | 'programs'>,
-  input: CreateInstructionAccounts & CreateInstructionArgs
+  input: UpdateInstructionAccounts & UpdateInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -91,37 +85,17 @@ export function create(
     },
     authority: {
       index: 1,
-      isWritable: false as boolean,
-      value: input.authority ?? null,
-    },
-    payer: {
-      index: 2,
       isWritable: true as boolean,
-      value: input.payer ?? null,
-    },
-    systemProgram: {
-      index: 3,
-      isWritable: false as boolean,
-      value: input.systemProgram ?? null,
+      value: input.authority ?? null,
     },
   } satisfies ResolvedAccountsWithIndices;
 
   // Arguments.
-  const resolvedArgs: CreateInstructionArgs = { ...input };
+  const resolvedArgs: UpdateInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.authority.value) {
-    resolvedAccounts.authority.value = context.identity.publicKey;
-  }
-  if (!resolvedAccounts.payer.value) {
-    resolvedAccounts.payer.value = context.payer;
-  }
-  if (!resolvedAccounts.systemProgram.value) {
-    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
-      'splSystem',
-      '11111111111111111111111111111111'
-    );
-    resolvedAccounts.systemProgram.isWritable = false;
+    resolvedAccounts.authority.value = context.identity;
   }
 
   // Accounts in order.
@@ -137,11 +111,11 @@ export function create(
   );
 
   // Data.
-  const data = getCreateInstructionDataSerializer().serialize(
-    resolvedArgs as CreateInstructionDataArgs
+  const data = getUpdateInstructionDataSerializer().serialize(
+    resolvedArgs as UpdateInstructionDataArgs
   );
 
-  // Bytes Created On Chain.
+  // Bytes Updated On Chain.
   const bytesCreatedOnChain = getMyAccountSize() + ACCOUNT_HEADER_SIZE;
 
   return transactionBuilder([

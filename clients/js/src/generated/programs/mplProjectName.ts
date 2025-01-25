@@ -18,7 +18,7 @@ import {
 } from '../errors';
 
 export const MPL_PROJECT_NAME_PROGRAM_ID =
-  'MyProgram1111111111111111111111111111111111' as PublicKey<'MyProgram1111111111111111111111111111111111'>;
+  'DkBb5dUHNsFsdPCLrDnUPDCuwFUtwpajJHLGWqb3ezFU' as PublicKey<'DkBb5dUHNsFsdPCLrDnUPDCuwFUtwpajJHLGWqb3ezFU'>;
 
 export function createMplProjectNameProgram(): Program {
   return {

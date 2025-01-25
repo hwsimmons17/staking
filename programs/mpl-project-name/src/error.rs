@@ -17,6 +17,9 @@ pub enum MplProjectNameError {
     /// 2 - Error serializing account
     #[error("Error serializing account")]
     SerializationError,
+    /// 3 - Invalid Authority
+    #[error("Invalid Authority")]
+    InvalidAuthority,
 }
 
 impl PrintProgramError for MplProjectNameError {

@@ -11,6 +11,11 @@ pub enum MplProjectNameInstruction {
     #[account(2, writable, signer, name="payer", desc = "The account paying for the storage fees")]
     #[account(3, name="system_program", desc = "The system program")]
     Create(CreateArgs),
+
+    /// Update My Account.
+    #[account(0, writable, signer, name="address", desc = "The address of the account to update")]
+    #[account(1, writable, signer, name="authority", desc = "The authority of the account")]
+    Update(CreateArgs)
 }
 
 #[repr(C)]

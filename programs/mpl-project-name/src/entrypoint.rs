@@ -5,6 +5,7 @@ use solana_program::{
 
 use crate::{error::MplProjectNameError, processor};
 
+
 entrypoint!(process_instruction);
 fn process_instruction<'a>(
     program_id: &'a Pubkey,

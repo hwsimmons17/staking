@@ -1,6 +1,6 @@
 import { generateSigner } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { MyAccount, create, fetchMyAccount } from '../src';
+import { MyAccount, create, fetchMyAccount, update } from '../src';
 import { createUmi } from './_setup';
 
 test('it can create new accounts', async (t) => {
@@ -17,4 +17,6 @@ test('it can create new accounts', async (t) => {
     authority: umi.identity.publicKey,
     data: { field1: 1, field2: 2 },
   });
+
+  await update(umi, { address, arg1: 3, arg2: 5 }).sendAndConfirm(umi);
 });
